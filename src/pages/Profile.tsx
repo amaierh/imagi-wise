@@ -6,6 +6,7 @@ import {
   CreditCard, Clock, CheckCircle2, AlertTriangle, XCircle, Send
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-interface Profile {
+interface ProfileData {
   id: string;
   full_name: string | null;
   subscription_type: string;
@@ -32,7 +33,7 @@ interface Profile {
 
 type SubscriptionStatus = "active" | "expiring-soon" | "expired" | "free";
 
-const getSubscriptionStatus = (profile: Profile): SubscriptionStatus => {
+const getSubscriptionStatus = (profile: ProfileData): SubscriptionStatus => {
   if (!profile.subscription_end || profile.subscription_type === "Free") return "free";
   const now = new Date();
   const end = new Date(profile.subscription_end);
@@ -58,10 +59,11 @@ const getTotalDays = (startDate: string | null, endDate: string | null): number 
 
 const Profile = () => {
   const { user, signOut } = useAuth();
+  const { t, lang, isRTL } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -80,8 +82,8 @@ const Profile = () => {
         .eq("id", user.id)
         .single();
       if (data) {
-        setProfile(data as Profile);
-        setRenewalName((data as Profile).full_name || "");
+        setProfile(data as ProfileData);
+        setRenewalName((data as ProfileData).full_name || "");
       }
       setLoadingProfile(false);
     };
@@ -91,14 +93,14 @@ const Profile = () => {
   const handleSignOut = async () => {
     setSigningOut(true);
     await signOut();
-    toast({ title: "تم تسجيل الخروج بنجاح." });
+    toast({ title: t("profile.signout.success") });
     navigate("/auth");
   };
 
   const handleRenewalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!renewalRequestType) {
-      toast({ title: "يرجى اختيار نوع الطلب.", variant: "destructive" });
+      toast({ title: t("profile.renewal.error.type"), variant: "destructive" });
       return;
     }
     setRenewalLoading(true);
@@ -111,16 +113,16 @@ const Profile = () => {
     });
     setRenewalLoading(false);
     if (error) {
-      toast({ title: "خطأ في الإرسال", description: error.message, variant: "destructive" });
+      toast({ title: t("profile.renewal.error.submit"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "✅ تم إرسال طلبك بنجاح!", description: "سيتواصل معك فريقنا قريباً." });
+      toast({ title: t("profile.renewal.success"), description: t("profile.renewal.success.desc") });
       setRenewalNotes("");
       setRenewalRequestType("");
     }
   };
 
   const createdAt = user?.created_at
-    ? new Date(user.created_at).toLocaleDateString("ar-EG", {
+    ? new Date(user.created_at).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB", {
         day: "numeric", month: "long", year: "numeric",
       })
     : "—";
@@ -138,10 +140,10 @@ const Profile = () => {
     .slice(0, 2);
 
   const subscriptionBadge = {
-    active: { label: "نشط ✓", className: "bg-success/10 text-success border-success/20" },
-    "expiring-soon": { label: "⚠️ قارب على الانتهاء", className: "bg-warning/10 text-warning-foreground border-warning/30" },
-    expired: { label: "❌ منتهي الصلاحية", className: "bg-destructive/10 text-destructive border-destructive/20" },
-    free: { label: "مجاني", className: "bg-muted text-muted-foreground border-border" },
+    active: { label: t("profile.badge.active"), className: "bg-success/10 text-success border-success/20" },
+    "expiring-soon": { label: t("profile.badge.expiring"), className: "bg-warning/10 text-warning-foreground border-warning/30" },
+    expired: { label: t("profile.badge.expired"), className: "bg-destructive/10 text-destructive border-destructive/20" },
+    free: { label: t("profile.badge.free"), className: "bg-muted text-muted-foreground border-border" },
   };
 
   const progressBarColor = {
@@ -151,6 +153,9 @@ const Profile = () => {
     free: "bg-muted-foreground",
   };
 
+  const iconSide = isRTL ? "right-3" : "left-3";
+  const inputPad = isRTL ? "pr-10" : "pl-10";
+
   return (
     <div className="min-h-screen gradient-hero px-4 py-8">
       <div className="max-w-lg mx-auto">
@@ -158,7 +163,7 @@ const Profile = () => {
           onClick={() => navigate("/")}
           className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm mb-6"
         >
-          <ArrowLeft className="w-4 h-4" /> العودة للرئيسية
+          <ArrowLeft className="w-4 h-4" /> {t("profile.back")}
         </button>
 
         <motion.div
@@ -175,7 +180,7 @@ const Profile = () => {
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl font-bold text-foreground truncate">
-                  {profile?.full_name || "المستخدم"}
+                  {profile?.full_name || t("profile.default_user")}
                 </h1>
                 <p className="text-sm text-muted-foreground truncate" dir="ltr">{user?.email}</p>
               </div>
@@ -187,7 +192,7 @@ const Profile = () => {
                   <Mail className="w-4 h-4 text-primary" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">البريد الإلكتروني</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">{t("profile.email")}</p>
                   <p className="text-foreground font-medium text-sm truncate" dir="ltr">{user?.email}</p>
                 </div>
               </div>
@@ -197,7 +202,7 @@ const Profile = () => {
                   <Calendar className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">عضو منذ</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">{t("profile.membersince")}</p>
                   <p className="text-foreground font-medium text-sm">{createdAt}</p>
                 </div>
               </div>
@@ -208,7 +213,7 @@ const Profile = () => {
           <div className="glass-card rounded-2xl p-6">
             <h2 className="font-bold text-foreground text-lg mb-5 flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-primary" />
-              الاشتراك
+              {t("profile.subscription")}
             </h2>
 
             {loadingProfile ? (
@@ -221,19 +226,19 @@ const Profile = () => {
                 {status === "expiring-soon" && (
                   <div className="flex items-center gap-2 bg-warning/10 border border-warning/30 rounded-xl p-3">
                     <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
-                    <p className="text-sm font-medium text-warning-foreground">اشتراكك على وشك الانتهاء</p>
+                    <p className="text-sm font-medium text-warning-foreground">{t("profile.status.expiring")}</p>
                   </div>
                 )}
                 {status === "expired" && (
                   <div className="flex items-center gap-2 bg-destructive/10 border border-destructive/20 rounded-xl p-3">
                     <XCircle className="w-4 h-4 text-destructive flex-shrink-0" />
-                    <p className="text-sm font-medium text-destructive">انتهى اشتراكك</p>
+                    <p className="text-sm font-medium text-destructive">{t("profile.status.expired")}</p>
                   </div>
                 )}
                 {status === "active" && (
                   <div className="flex items-center gap-2 bg-success/10 border border-success/20 rounded-xl p-3">
                     <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
-                    <p className="text-sm font-medium text-success">اشتراكك نشط</p>
+                    <p className="text-sm font-medium text-success">{t("profile.status.active")}</p>
                   </div>
                 )}
 
@@ -242,9 +247,9 @@ const Profile = () => {
                   <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${subscriptionBadge[status].className}`}>
                     {subscriptionBadge[status].label}
                   </span>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">📋 نوع الاشتراك</p>
-                    <p className="font-bold text-foreground">{profile?.subscription_type || "Free"}</p>
+                  <div className={isRTL ? "text-right" : "text-left"}>
+                    <p className="text-xs text-muted-foreground">{t("profile.subscriptiontype")}</p>
+                    <p className="font-bold text-foreground" dir="ltr">{profile?.subscription_type || "Free"}</p>
                   </div>
                 </div>
 
@@ -254,10 +259,10 @@ const Profile = () => {
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
-                          الوقت المتبقي
+                          {t("profile.timeremaining")}
                         </span>
                         <span className="font-semibold text-foreground">
-                          {status === "expired" ? "منتهي الصلاحية" : `${daysLeft} يوم متبقي`}
+                          {status === "expired" ? t("profile.status.expired_label") : `${daysLeft} ${t("profile.days")}`}
                         </span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
@@ -271,9 +276,9 @@ const Profile = () => {
                     {profile?.subscription_end && (
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-medium text-foreground" dir="ltr">
-                          {new Date(profile.subscription_end).toLocaleDateString("ar-EG")}
+                          {new Date(profile.subscription_end).toLocaleDateString(lang === "ar" ? "ar-EG" : "en-GB")}
                         </span>
-                        <span className="text-muted-foreground">📅 تاريخ الانتهاء</span>
+                        <span className="text-muted-foreground">{t("profile.expiry")}</span>
                       </div>
                     )}
                   </>
@@ -286,65 +291,67 @@ const Profile = () => {
           <div className="glass-card rounded-2xl p-6">
             <h2 className="font-bold text-foreground text-lg mb-2 flex items-center gap-2">
               <Send className="w-5 h-5 text-primary" />
-              طلب تجديد الاشتراك
+              {t("profile.renewal.title")}
             </h2>
             <p className="text-sm text-muted-foreground mb-5">
-              لتجديد اشتراكك أو الترقية إلى خطة أعلى، أرسل طلبك وسيتواصل معك فريقنا.
+              {t("profile.renewal.desc")}
             </p>
 
             <form onSubmit={handleRenewalSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="r-name">الاسم الكامل</Label>
+                <Label htmlFor="r-name">{t("auth.fullname")}</Label>
                 <div className="relative">
-                  <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <User className={`absolute ${iconSide} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                   <Input
                     id="r-name"
                     value={renewalName}
                     onChange={(e) => setRenewalName(e.target.value)}
-                    className="pr-10 text-right"
-                    placeholder="الاسم الكامل"
+                    className={inputPad}
+                    placeholder={t("auth.fullname")}
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="r-email">البريد الإلكتروني</Label>
+                <Label htmlFor="r-email">{t("auth.email")}</Label>
                 <div className="relative">
-                  <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Mail className={`absolute ${iconSide} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                   <Input
                     id="r-email"
                     value={user?.email || ""}
                     disabled
-                    className="pr-10 text-right bg-muted/50 cursor-not-allowed"
+                    className={`${inputPad} bg-muted/50 cursor-not-allowed`}
                     dir="ltr"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label>نوع الطلب</Label>
-                <Select value={renewalRequestType} onValueChange={setRenewalRequestType} dir="rtl">
-                  <SelectTrigger className="text-right">
-                    <SelectValue placeholder="اختر نوع الطلب" />
+                <Label>{t("profile.renewal.type")}</Label>
+                <Select value={renewalRequestType} onValueChange={setRenewalRequestType} dir={isRTL ? "rtl" : "ltr"}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("profile.renewal.type.placeholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="تجديد الخطة الحالية">تجديد الخطة الحالية</SelectItem>
-                    <SelectItem value="الترقية إلى Pro">الترقية إلى Pro</SelectItem>
-                    <SelectItem value="الترقية إلى Enterprise">الترقية إلى Enterprise</SelectItem>
-                    <SelectItem value="الاستفسار عن الأسعار">الاستفسار عن الأسعار</SelectItem>
+                    <SelectItem value="renew">{t("profile.renewal.renew")}</SelectItem>
+                    <SelectItem value="upgrade-pro">{t("profile.renewal.upgradepro")}</SelectItem>
+                    <SelectItem value="upgrade-enterprise">{t("profile.renewal.upgradeenterprise")}</SelectItem>
+                    <SelectItem value="inquiry">{t("profile.renewal.inquiry")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="r-notes">ملاحظات إضافية <span className="text-muted-foreground">(اختياري)</span></Label>
+                <Label htmlFor="r-notes">
+                  {t("profile.renewal.notes")} <span className="text-muted-foreground">{t("profile.renewal.notes.optional")}</span>
+                </Label>
                 <Textarea
                   id="r-notes"
                   value={renewalNotes}
                   onChange={(e) => setRenewalNotes(e.target.value)}
-                  placeholder="أي ملاحظات أو متطلبات خاصة..."
-                  className="text-right resize-none"
+                  placeholder={t("profile.renewal.notes.placeholder")}
+                  className="resize-none"
                   rows={3}
                 />
               </div>
@@ -357,12 +364,12 @@ const Profile = () => {
                 {renewalLoading ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-primary-foreground/40 border-t-primary-foreground rounded-full animate-spin" />
-                    جاري الإرسال…
+                    {t("profile.renewal.submitting")}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
                     <Send className="w-4 h-4" />
-                    إرسال الطلب
+                    {t("profile.renewal.submit")}
                   </span>
                 )}
               </Button>
@@ -379,11 +386,11 @@ const Profile = () => {
             {signingOut ? (
               <span className="flex items-center gap-2">
                 <span className="w-4 h-4 border-2 border-destructive-foreground/40 border-t-destructive-foreground rounded-full animate-spin" />
-                جاري الخروج…
+                {t("profile.signingout")}
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                <LogOut className="w-4 h-4" /> تسجيل الخروج
+                <LogOut className="w-4 h-4" /> {t("profile.signout")}
               </span>
             )}
           </Button>

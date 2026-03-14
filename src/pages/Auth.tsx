@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type AuthView = "tabs" | "confirm-email";
 
@@ -24,6 +25,7 @@ const GoogleIcon = () => (
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, isRTL } = useLanguage();
   const [view, setView] = useState<AuthView>("tabs");
   const [confirmedEmail, setConfirmedEmail] = useState("");
 
@@ -53,7 +55,7 @@ const Auth = () => {
     });
     setSignInLoading(false);
     if (error) {
-      toast({ title: "خطأ في تسجيل الدخول", description: error.message, variant: "destructive" });
+      toast({ title: t("auth.error.signin"), description: error.message, variant: "destructive" });
     } else {
       navigate("/");
     }
@@ -62,11 +64,11 @@ const Auth = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (signUpPassword !== signUpConfirmPw) {
-      toast({ title: "كلمات المرور غير متطابقة", variant: "destructive" });
+      toast({ title: t("auth.error.passwordmismatch"), variant: "destructive" });
       return;
     }
     if (signUpPassword.length < 6) {
-      toast({ title: "كلمة المرور قصيرة جداً", description: "يجب أن تكون 6 أحرف على الأقل.", variant: "destructive" });
+      toast({ title: t("auth.error.passwordshort"), description: t("auth.error.passwordshort.desc"), variant: "destructive" });
       return;
     }
     setSignUpLoading(true);
@@ -80,7 +82,7 @@ const Auth = () => {
     });
     setSignUpLoading(false);
     if (error) {
-      toast({ title: "خطأ في إنشاء الحساب", description: error.message, variant: "destructive" });
+      toast({ title: t("auth.error.signup"), description: error.message, variant: "destructive" });
     } else {
       setConfirmedEmail(signUpEmail);
       setView("confirm-email");
@@ -94,18 +96,23 @@ const Auth = () => {
     });
     setGoogleLoading(false);
     if (result && 'error' in result && result.error) {
-      toast({ title: "خطأ في تسجيل الدخول بـ Google", description: String(result.error), variant: "destructive" });
+      toast({ title: t("auth.error.google"), description: String(result.error), variant: "destructive" });
     }
   };
 
   const handleResendEmail = async () => {
     const { error } = await supabase.auth.resend({ type: "signup", email: confirmedEmail });
     if (error) {
-      toast({ title: "خطأ في الإرسال", description: error.message, variant: "destructive" });
+      toast({ title: t("auth.error.resend"), description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "✅ تم إرسال البريد مجدداً!" });
+      toast({ title: t("auth.resend.success") });
     }
   };
+
+  const iconSide = isRTL ? "right-3" : "left-3";
+  const inputPadStart = isRTL ? "pr-10" : "pl-10";
+  const inputPadEnd = isRTL ? "pl-10" : "pr-10";
+  const eyeSide = isRTL ? "left-3" : "right-3";
 
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center px-4 py-8">
@@ -121,7 +128,7 @@ const Auth = () => {
             <Activity className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-extrabold text-primary tracking-tight">RadiRight</h1>
-          <p className="text-sm text-muted-foreground mt-1">Evidence-Based MSK Imaging Guidance</p>
+          <p className="text-sm text-muted-foreground mt-1" dir="ltr">Evidence-Based MSK Imaging Guidance</p>
         </motion.div>
 
         <AnimatePresence mode="wait">
@@ -136,24 +143,24 @@ const Auth = () => {
               <div className="glass-card rounded-2xl p-6">
                 <Tabs defaultValue="signin" className="w-full">
                   <TabsList className="w-full mb-6">
-                    <TabsTrigger value="signin" className="flex-1">تسجيل الدخول</TabsTrigger>
-                    <TabsTrigger value="signup" className="flex-1">إنشاء حساب</TabsTrigger>
+                    <TabsTrigger value="signin" className="flex-1">{t("auth.tab.signin")}</TabsTrigger>
+                    <TabsTrigger value="signup" className="flex-1">{t("auth.tab.signup")}</TabsTrigger>
                   </TabsList>
 
                   {/* ===== Sign In Tab ===== */}
                   <TabsContent value="signin">
                     <form onSubmit={handleSignIn} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="si-email">البريد الإلكتروني</Label>
+                        <Label htmlFor="si-email">{t("auth.email")}</Label>
                         <div className="relative">
-                          <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Mail className={`absolute ${iconSide} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                           <Input
                             id="si-email"
                             type="email"
                             placeholder="you@example.com"
                             value={signInEmail}
                             onChange={(e) => setSignInEmail(e.target.value)}
-                            className="pr-10 text-right"
+                            className={inputPadStart}
                             dir="ltr"
                             required
                           />
@@ -164,18 +171,18 @@ const Auth = () => {
                         <div className="flex items-center justify-between">
                           <button
                             type="button"
-                            onClick={() => toast({ title: "قريباً", description: "ميزة استعادة كلمة المرور قادمة." })}
+                            onClick={() => toast({ title: t("auth.coming_soon"), description: t("auth.forgot_coming_soon") })}
                             className="text-xs text-primary hover:underline"
                           >
-                            نسيت كلمة المرور؟
+                            {t("auth.forgotpassword")}
                           </button>
-                          <Label htmlFor="si-password">كلمة المرور</Label>
+                          <Label htmlFor="si-password">{t("auth.password")}</Label>
                         </div>
                         <div className="relative">
                           <button
                             type="button"
                             onClick={() => setSignInShowPw(!signInShowPw)}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            className={`absolute ${eyeSide} top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground`}
                           >
                             {signInShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
@@ -185,7 +192,7 @@ const Auth = () => {
                             placeholder="••••••••"
                             value={signInPassword}
                             onChange={(e) => setSignInPassword(e.target.value)}
-                            className="pl-10 text-right"
+                            className={inputPadEnd}
                             dir="ltr"
                             required
                           />
@@ -200,9 +207,9 @@ const Auth = () => {
                         {signInLoading ? (
                           <span className="flex items-center gap-2">
                             <span className="w-4 h-4 border-2 border-primary-foreground/40 border-t-primary-foreground rounded-full animate-spin" />
-                            جاري الدخول…
+                            {t("auth.signinloading")}
                           </span>
-                        ) : "تسجيل الدخول"}
+                        ) : t("auth.signinbtn")}
                       </Button>
 
                       <div className="relative my-4">
@@ -210,7 +217,7 @@ const Auth = () => {
                           <div className="w-full border-t border-border" />
                         </div>
                         <div className="relative flex justify-center text-xs">
-                          <span className="bg-card px-3 text-muted-foreground">أو</span>
+                          <span className="bg-card px-3 text-muted-foreground">{t("auth.or")}</span>
                         </div>
                       </div>
 
@@ -222,7 +229,7 @@ const Auth = () => {
                         className="w-full flex items-center justify-center gap-2"
                       >
                         <GoogleIcon />
-                        {googleLoading ? "جاري التحميل…" : "المتابعة مع Google"}
+                        {googleLoading ? t("auth.googleloading") : t("auth.continuewithgoogle")}
                       </Button>
                     </form>
                   </TabsContent>
@@ -231,32 +238,32 @@ const Auth = () => {
                   <TabsContent value="signup">
                     <form onSubmit={handleSignUp} className="space-y-4">
                       <div className="space-y-1.5">
-                        <Label htmlFor="su-name">الاسم الكامل</Label>
+                        <Label htmlFor="su-name">{t("auth.fullname")}</Label>
                         <div className="relative">
-                          <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <User className={`absolute ${iconSide} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                           <Input
                             id="su-name"
                             type="text"
-                            placeholder="الاسم الكامل"
+                            placeholder={t("auth.fullname")}
                             value={signUpFullName}
                             onChange={(e) => setSignUpFullName(e.target.value)}
-                            className="pr-10 text-right"
+                            className={inputPadStart}
                             required
                           />
                         </div>
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label htmlFor="su-email">البريد الإلكتروني</Label>
+                        <Label htmlFor="su-email">{t("auth.email")}</Label>
                         <div className="relative">
-                          <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Mail className={`absolute ${iconSide} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                           <Input
                             id="su-email"
                             type="email"
                             placeholder="you@example.com"
                             value={signUpEmail}
                             onChange={(e) => setSignUpEmail(e.target.value)}
-                            className="pr-10 text-right"
+                            className={inputPadStart}
                             dir="ltr"
                             required
                           />
@@ -264,12 +271,12 @@ const Auth = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label htmlFor="su-password">كلمة المرور</Label>
+                        <Label htmlFor="su-password">{t("auth.password")}</Label>
                         <div className="relative">
                           <button
                             type="button"
                             onClick={() => setSignUpShowPw(!signUpShowPw)}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            className={`absolute ${eyeSide} top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground`}
                           >
                             {signUpShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                           </button>
@@ -279,7 +286,7 @@ const Auth = () => {
                             placeholder="••••••••"
                             value={signUpPassword}
                             onChange={(e) => setSignUpPassword(e.target.value)}
-                            className="pl-10 text-right"
+                            className={inputPadEnd}
                             dir="ltr"
                             required
                           />
@@ -287,16 +294,16 @@ const Auth = () => {
                       </div>
 
                       <div className="space-y-1.5">
-                        <Label htmlFor="su-confirm">تأكيد كلمة المرور</Label>
+                        <Label htmlFor="su-confirm">{t("auth.confirmpassword")}</Label>
                         <div className="relative">
-                          <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Lock className={`absolute ${iconSide} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
                           <Input
                             id="su-confirm"
                             type={signUpShowPw ? "text" : "password"}
                             placeholder="••••••••"
                             value={signUpConfirmPw}
                             onChange={(e) => setSignUpConfirmPw(e.target.value)}
-                            className="pr-10 text-right"
+                            className={inputPadStart}
                             dir="ltr"
                             required
                           />
@@ -311,9 +318,9 @@ const Auth = () => {
                         {signUpLoading ? (
                           <span className="flex items-center gap-2">
                             <span className="w-4 h-4 border-2 border-primary-foreground/40 border-t-primary-foreground rounded-full animate-spin" />
-                            جاري الإنشاء…
+                            {t("auth.signuploading")}
                           </span>
-                        ) : "إنشاء حساب"}
+                        ) : t("auth.signupbtn")}
                       </Button>
 
                       <div className="relative my-4">
@@ -321,7 +328,7 @@ const Auth = () => {
                           <div className="w-full border-t border-border" />
                         </div>
                         <div className="relative flex justify-center text-xs">
-                          <span className="bg-card px-3 text-muted-foreground">أو</span>
+                          <span className="bg-card px-3 text-muted-foreground">{t("auth.or")}</span>
                         </div>
                       </div>
 
@@ -333,7 +340,7 @@ const Auth = () => {
                         className="w-full flex items-center justify-center gap-2"
                       >
                         <GoogleIcon />
-                        {googleLoading ? "جاري التحميل…" : "المتابعة مع Google"}
+                        {googleLoading ? t("auth.googleloading") : t("auth.continuewithgoogle")}
                       </Button>
                     </form>
                   </TabsContent>
@@ -353,13 +360,13 @@ const Auth = () => {
                 <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-4xl">✉️</span>
                 </div>
-                <h2 className="text-2xl font-bold text-foreground mb-3">تحقق من بريدك الإلكتروني</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-3">{t("auth.verifyemail.title")}</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-2">
-                  أرسلنا رابط التأكيد إلى
+                  {t("auth.verifyemail.sent")}
                 </p>
                 <p className="font-semibold text-primary mb-4 text-sm" dir="ltr">{confirmedEmail}</p>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-8">
-                  يرجى فتح بريدك الإلكتروني والنقر على الرابط لتفعيل حسابك.
+                  {t("auth.verifyemail.body")}
                 </p>
 
                 <Button
@@ -367,7 +374,7 @@ const Auth = () => {
                   onClick={handleResendEmail}
                   className="w-full mb-3"
                 >
-                  إعادة إرسال البريد
+                  {t("auth.verifyemail.resend")}
                 </Button>
 
                 <button
@@ -375,7 +382,7 @@ const Auth = () => {
                   className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  العودة لتسجيل الدخول
+                  {t("auth.verifyemail.backtosignin")}
                 </button>
               </div>
             </motion.div>
