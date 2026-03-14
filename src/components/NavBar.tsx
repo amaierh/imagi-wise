@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Activity, User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,14 +12,43 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
+const LanguageToggle = () => {
+  const { lang, setLang } = useLanguage();
+  return (
+    <div className="flex items-center rounded-full border border-border overflow-hidden text-xs font-semibold">
+      <button
+        onClick={() => setLang("ar")}
+        className={`px-2.5 py-1 transition-colors ${
+          lang === "ar"
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
+        AR
+      </button>
+      <button
+        onClick={() => setLang("en")}
+        className={`px-2.5 py-1 transition-colors ${
+          lang === "en"
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
+        EN
+      </button>
+    </div>
+  );
+};
+
 const NavBar = () => {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSignOut = async () => {
     await signOut();
-    toast({ title: "تم تسجيل الخروج بنجاح." });
+    toast({ title: t("profile.signout.success") });
     navigate("/auth");
   };
 
@@ -35,46 +65,50 @@ const NavBar = () => {
         </button>
 
         {/* Right side */}
-        {user ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                <div className="w-7 h-7 gradient-primary rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <span className="hidden sm:inline text-sm truncate max-w-[140px]">{user.email}</span>
-                <ChevronDown className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-2">
+          <LanguageToggle />
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                  <div className="w-7 h-7 gradient-primary rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                  <span className="hidden sm:inline text-sm truncate max-w-[140px]">{user.email}</span>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer gap-2">
+                  <User className="w-4 h-4" />
+                  {t("nav.profile")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+                >
+                  <LogOut className="w-4 h-4" />
+                  {t("nav.signout")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+                {t("nav.signin")}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer gap-2">
-                <User className="w-4 h-4" />
-                الملف الشخصي
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={handleSignOut}
-                className="cursor-pointer gap-2 text-destructive focus:text-destructive"
+              <Button
+                size="sm"
+                onClick={() => navigate("/auth")}
+                className="gradient-primary text-primary-foreground border-0 hover:opacity-90"
               >
-                <LogOut className="w-4 h-4" />
-                تسجيل الخروج
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
-              تسجيل الدخول
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => navigate("/auth")}
-              className="gradient-primary text-primary-foreground border-0 hover:opacity-90"
-            >
-              إنشاء حساب
-            </Button>
-          </div>
-        )}
+                {t("nav.signup")}
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

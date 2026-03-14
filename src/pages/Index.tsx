@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Activity, ArrowRight, BookOpen, Bot, ShieldCheck, Globe, Sparkles } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const guidelines = [
   { name: "ACR", full: "American College of Radiology" },
@@ -27,6 +28,7 @@ const fadeUp = {
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen gradient-hero">
@@ -48,13 +50,12 @@ const Index = () => {
           </motion.div>
 
           <h1 className="text-5xl font-extrabold text-primary mb-2 tracking-tight">RadiRight</h1>
-          <p className="text-lg font-medium text-secondary mb-8">Evidence-Based MSK Imaging Guidance</p>
+          <p className="text-lg font-medium text-secondary mb-8" dir="ltr">Evidence-Based MSK Imaging Guidance</p>
 
-          <div className="glass-card rounded-2xl p-6 mb-8 text-left">
+          <div className="glass-card rounded-2xl p-6 mb-8 text-start">
             <p className="text-foreground leading-relaxed">
-              RadiRight guides healthcare professionals to choose the most appropriate imaging based on
-              clinical scenarios and our evidence-based recommendations synthesized from over{" "}
-              <span className="font-bold text-primary">10 international guidelines</span>.
+              {t("home.description")}{" "}
+              <span className="font-bold text-primary">{t("home.guidelines_count")}</span>.
             </p>
           </div>
 
@@ -64,11 +65,11 @@ const Index = () => {
             whileTap={{ scale: 0.98 }}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 rounded-xl gradient-primary text-primary-foreground font-bold text-lg shadow-lg hover:shadow-xl transition-shadow min-h-[56px] animate-pulse-soft"
           >
-            Start Assessment
+            {t("home.startassessment")}
             <ArrowRight className="w-5 h-5" />
           </motion.button>
 
-          <p className="text-xs text-muted-foreground mt-6">For Medical Professionals</p>
+          <p className="text-xs text-muted-foreground mt-6">{t("home.forprofessionals")}</p>
         </motion.div>
       </section>
 
@@ -85,13 +86,13 @@ const Index = () => {
             <motion.div variants={fadeUp} className="text-center mb-10">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-semibold mb-4">
                 <ShieldCheck className="w-4 h-4" />
-                Built on Evidence
+                {t("home.builton")}
               </div>
               <h2 className="text-3xl font-bold text-foreground mb-3">
-                Powered by 10+ International Guidelines
+                {t("home.powered_title")}
               </h2>
               <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Our recommendations are carefully synthesized from the world's most trusted radiology and medical imaging authorities, ensuring you get reliable, up-to-date guidance.
+                {t("home.powered_desc")}
               </p>
             </motion.div>
 
@@ -103,8 +104,8 @@ const Index = () => {
                   className="glass-card rounded-xl p-4 text-center hover:shadow-lg hover:border-primary/30 transition-all group"
                 >
                   <Globe className="w-5 h-5 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                  <p className="font-bold text-foreground text-sm">{g.name}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{g.full}</p>
+                  <p className="font-bold text-foreground text-sm" dir="ltr">{g.name}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight" dir="ltr">{g.full}</p>
                 </div>
               ))}
             </motion.div>
@@ -118,13 +119,15 @@ const Index = () => {
                     <BookOpen className="w-5 h-5 text-success" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-foreground text-lg mb-2">Evidence-Based Recommendations</h3>
+                    <h3 className="font-bold text-foreground text-lg mb-2">{t("home.evidence_title")}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      Every imaging recommendation in RadiRight is derived from a thorough review of guidelines published by organizations like the{" "}
-                      <span className="font-semibold text-foreground">ACR Appropriateness Criteria</span>,{" "}
-                      <span className="font-semibold text-foreground">iRefer</span> (Royal College of Radiologists),{" "}
-                      <span className="font-semibold text-foreground">CAR</span>,{" "}
-                      <span className="font-semibold text-foreground">WHO</span>, and more. When guidelines agree, we present the consensus. When they differ, we highlight the options and context.
+                      {t("home.evidence_desc")}{" "}
+                      <span className="font-semibold text-foreground" dir="ltr">ACR Appropriateness Criteria</span>,{" "}
+                      <span className="font-semibold text-foreground" dir="ltr">iRefer</span>{" "}
+                      <span className="font-semibold text-foreground" dir="ltr">(Royal College of Radiologists)</span>,{" "}
+                      <span className="font-semibold text-foreground" dir="ltr">CAR</span>,{" "}
+                      <span className="font-semibold text-foreground" dir="ltr">WHO</span>,{" "}
+                      {t("home.evidence_desc2")}
                     </p>
                   </div>
                 </div>
@@ -137,10 +140,9 @@ const Index = () => {
                     <Bot className="w-5 h-5 text-ai" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-foreground text-lg mb-2">AI-Powered Clinical Reasoning</h3>
+                    <h3 className="font-bold text-foreground text-lg mb-2">{t("home.ai_title")}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">
-                      RadiRight integrates AI to provide{" "}
-                      <span className="font-semibold text-foreground">contextual explanations</span> for every recommendation — explaining <em>why</em> a modality is appropriate, when alternatives should be considered, and what the clinical evidence says. When no guideline exists, AI steps in with evidence-based reasoning to guide your decision.
+                      {t("home.ai_desc")}
                     </p>
                   </div>
                 </div>
@@ -151,32 +153,23 @@ const Index = () => {
             <motion.div variants={fadeUp} className="glass-card rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-5">
                 <Sparkles className="w-5 h-5 text-ai" />
-                <h3 className="font-bold text-foreground text-lg">How AI Enhances Your Assessment</h3>
+                <h3 className="font-bold text-foreground text-lg">{t("home.ai_enhance_title")}</h3>
               </div>
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
-                  {
-                    title: "Clinical Explanations",
-                    desc: "Understand the reasoning behind each recommendation with plain-language explanations grounded in radiology literature.",
-                  },
-                  {
-                    title: "Gap Coverage",
-                    desc: "When guidelines don't cover a specific scenario, AI provides evidence-based opinions while clearly noting the absence of formal guidance.",
-                  },
-                  {
-                    title: "Educational Feedback",
-                    desc: "Learn from every assessment — whether your choice was correct, a 2nd choice, or not indicated, AI explains what to consider next time.",
-                  },
+                  { titleKey: "home.ai_feature1_title", descKey: "home.ai_feature1_desc" },
+                  { titleKey: "home.ai_feature2_title", descKey: "home.ai_feature2_desc" },
+                  { titleKey: "home.ai_feature3_title", descKey: "home.ai_feature3_desc" },
                 ].map((item) => (
-                  <div key={item.title} className="bg-accent/50 rounded-xl p-4">
-                    <p className="font-semibold text-foreground text-sm mb-1">{item.title}</p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  <div key={item.titleKey} className="bg-accent/50 rounded-xl p-4">
+                    <p className="font-semibold text-foreground text-sm mb-1">{t(item.titleKey)}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{t(item.descKey)}</p>
                   </div>
                 ))}
               </div>
               <p className="text-xs text-muted-foreground mt-4 flex items-start gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-primary" />
-                AI explanations are designed to support — never replace — clinical judgment. All outputs include appropriate disclaimers.
+                {t("home.disclaimer")}
               </p>
             </motion.div>
           </motion.div>
