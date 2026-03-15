@@ -94,20 +94,7 @@ const NavBar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
-                {t("nav.signin")}
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => navigate("/auth")}
-                className="gradient-primary text-primary-foreground border-0 hover:opacity-90"
-              >
-                {t("nav.signup")}
-              </Button>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
     </header>
