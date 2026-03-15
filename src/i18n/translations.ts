@@ -96,7 +96,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "home.startassessment": "بدء التقييم",
     "home.forprofessionals": "للمختصين الطبيين",
     "home.builton": "مبني على الدليل",
-    "home.powered_title": "مدعوم بأكثر من 10 إرشادات دولية",
+    "home.powered_title": "مُستخلص من أكثر من 10 إرشادات دولية",
     "home.powered_desc": "توصياتنا مستقاة بعناية من أكثر أجهزة الأشعة والتصوير الطبي موثوقية عالمياً، مما يضمن حصولك على توجيه موثوق ومحدث.",
     "home.evidence_title": "توصيات مستندة إلى الدليل",
     "home.evidence_desc": "كل توصية تصويرية في RadiRight مستمدة من مراجعة دقيقة للإرشادات الصادرة عن منظمات مثل",
