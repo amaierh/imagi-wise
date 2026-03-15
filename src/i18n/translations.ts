@@ -208,7 +208,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "home.startassessment": "Start Assessment",
     "home.forprofessionals": "For Medical Professionals",
     "home.builton": "Built on Evidence",
-    "home.powered_title": "Powered by 10+ International Guidelines",
+    "home.powered_title": "Synthesized from 10+ International Guidelines",
     "home.powered_desc": "Our recommendations are carefully synthesized from the world's most trusted radiology and medical imaging authorities, ensuring you get reliable, up-to-date guidance.",
     "home.evidence_title": "Evidence-Based Recommendations",
     "home.evidence_desc": "Every imaging recommendation in RadiRight is derived from a thorough review of guidelines published by organizations like the",
