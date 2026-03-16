@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Activity, User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown } from "lucide-react";
+import logoSvg from "@/assets/radi_right_logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -58,10 +59,9 @@ const NavBar = () => {
         {/* Logo */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 font-extrabold text-primary text-lg tracking-tight"
+          className="flex items-center"
         >
-          <Activity className="w-5 h-5" />
-          RadiRight
+          <img src={logoSvg} alt="RadiRight" className="h-10 w-auto" />
         </button>
 
         {/* Right side */}
@@ -72,7 +72,7 @@ const NavBar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                  <div className="w-7 h-7 gradient-primary rounded-full flex items-center justify-center">
+          <div className="w-7 h-7 gradient-primary rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-primary-foreground" />
                   </div>
                   <span className="hidden sm:inline text-sm truncate max-w-[140px]">{user.email}</span>
