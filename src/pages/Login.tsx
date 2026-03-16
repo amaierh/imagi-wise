@@ -39,10 +39,7 @@ const Login = () => {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Activity className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-primary tracking-tight">RadiRight</h1>
+          <img src={logoSvg} alt="RadiRight" className="h-20 w-auto mx-auto mb-4" />
           <p className="text-muted-foreground mt-1 text-sm">Sign in to your account</p>
         </div>
 
