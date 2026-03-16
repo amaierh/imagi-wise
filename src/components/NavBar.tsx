@@ -73,7 +73,7 @@ const NavBar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-                  <div className="w-7 h-7 gradient-primary rounded-full flex items-center justify-center">
+          <div className="w-7 h-7 gradient-primary rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-primary-foreground" />
                   </div>
                   <span className="hidden sm:inline text-sm truncate max-w-[140px]">{user.email}</span>
