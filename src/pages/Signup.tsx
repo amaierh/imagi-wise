@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Activity, Mail, Lock, UserPlus, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, UserPlus, Eye, EyeOff } from "lucide-react";
+import logoSvg from "@/assets/radi_right_logo.svg";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -55,10 +56,7 @@ const Signup = () => {
       >
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Activity className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-primary tracking-tight">RadiRight</h1>
+          <img src={logoSvg} alt="RadiRight" className="h-20 w-auto mx-auto mb-4" />
           <p className="text-muted-foreground mt-1 text-sm">Create your account</p>
         </div>
 

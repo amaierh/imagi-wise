@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from "lucide-react";
+import logoSvg from "@/assets/radi_right_logo.svg";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
@@ -124,10 +125,7 @@ const Auth = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-8">
           
-          <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Activity className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-primary tracking-tight">RadiRight</h1>
+          <img src={logoSvg} alt="RadiRight" className="h-20 w-auto mx-auto mb-4" />
           <p className="text-sm text-muted-foreground mt-1" dir="ltr">Evidence-Based Imaging Guidance</p>
         </motion.div>
 
