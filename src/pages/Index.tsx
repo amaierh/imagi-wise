@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Activity, ArrowRight, BookOpen, Bot, ShieldCheck, Globe, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, ShieldCheck, Globe, Sparkles } from "lucide-react";
+import logoSvg from "@/assets/radi_right_logo.svg";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const guidelines = [
