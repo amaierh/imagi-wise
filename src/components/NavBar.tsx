@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Activity, User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown } from "lucide-react";
+import logoSvg from "@/assets/radi_right_logo.svg";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
