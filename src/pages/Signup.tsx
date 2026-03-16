@@ -39,9 +39,9 @@ const Signup = () => {
     } else {
       toast({
         title: "Account created!",
-        description: "Check your email to confirm your account.",
+        description: "Welcome! Your account is ready.",
       });
-      navigate("/login");
+      navigate("/");
     }
     setLoading(false);
   };
