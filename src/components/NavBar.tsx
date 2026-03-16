@@ -59,10 +59,9 @@ const NavBar = () => {
         {/* Logo */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 font-extrabold text-primary text-lg tracking-tight"
+          className="flex items-center"
         >
-          <Activity className="w-5 h-5" />
-          RadiRight
+          <img src={logoSvg} alt="RadiRight" className="h-10 w-auto" />
         </button>
 
         {/* Right side */}
