@@ -1,99 +1,116 @@
-import { useState, useMemo } from "react";
-import { topics, type Scenario, type Question } from "@/data/topics";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { mskDecisionTrees } from "@/data/msk_decision_trees";
+import type { DecisionNode, QuestionNode, ResultNode, NoGuidelinesNode } from "@/data/mskTypes";
+import { compareModality } from "@/data/mskTypes";
 
 interface Props {
   topicId: string;
   selectedModality: string;
-  onResult: (scenario: Scenario) => void;
+  onResult: (result: ResultPayload) => void;
   onBack: () => void;
 }
 
+export interface ResultPayload {
+  type: "result" | "noGuidelines";
+  node: ResultNode | NoGuidelinesNode;
+  compareResult?: ReturnType<typeof compareModality>;
+}
+
 const QuestionFlow = ({ topicId, selectedModality, onResult, onBack }: Props) => {
-  const topic = topics.find((t) => t.id === topicId);
-  const [currentQuestionId, setCurrentQuestionId] = useState(topic?.questions[0]?.id || "");
-  const [answeredCount, setAnsweredCount] = useState(0);
+  // Find topic in decision tree data
+  const topic = (mskDecisionTrees.topics as unknown as Array<{
+    id: string;
+    name: string;
+    rootNodeId: string;
+    nodes: Record<string, DecisionNode>;
+  }>).find((t) => t.id === topicId);
 
-  const currentQuestion = useMemo(
-    () => topic?.questions.find((q) => q.id === currentQuestionId),
-    [topic, currentQuestionId]
-  );
+  const [currentNodeId, setCurrentNodeId] = useState(topic?.rootNodeId ?? "");
+  const [history, setHistory] = useState<string[]>([]);
 
-  if (!topic || !currentQuestion) return null;
+  if (!topic) return null;
 
-  const totalQuestions = topic.questions.length;
+  const currentNode = topic.nodes[currentNodeId] as DecisionNode | undefined;
+  if (!currentNode) return null;
 
-  const handleAnswer = (answerId: string) => {
-    const answer = currentQuestion.answers.find((a) => a.id === answerId);
-    if (!answer) return;
+  // If we land on a result or noGuidelines node, fire immediately
+  if (currentNode.type === "result") {
+    const compare = compareModality(selectedModality, currentNode as ResultNode);
+    onResult({ type: "result", node: currentNode as ResultNode, compareResult: compare });
+    return null;
+  }
+  if (currentNode.type === "noGuidelines") {
+    onResult({ type: "noGuidelines", node: currentNode as NoGuidelinesNode });
+    return null;
+  }
 
-    setAnsweredCount((c) => c + 1);
+  const qNode = currentNode as QuestionNode;
+  const progress = Math.min(((history.length + 1) / (history.length + 2)) * 100, 95);
 
-    if (answer.evaluation) {
-      // Find matching scenario
-      const scenario = answer.evaluation.scenarios.find(
-        (s) => s.userSelected === selectedModality || s.userSelected === "any"
-      );
+  const handleAnswer = (nextNodeId: string) => {
+    setHistory((h) => [...h, currentNodeId]);
+    setCurrentNodeId(nextNodeId);
+  };
 
-      if (scenario) {
-        onResult(scenario);
-      } else {
-        // Default FALSE if no specific scenario
-        onResult({
-          userSelected: selectedModality,
-          result: "FALSE",
-          display: "❌ FALSE - Imaging NOT Indicated",
-          message: `${selectedModality} is not the recommended imaging for this scenario.`,
-          alternatives: [answer.evaluation.recommendation],
-          aiPrompt: "Explain the appropriate imaging for this clinical scenario",
-        });
-      }
-    } else if (answer.nextQuestion) {
-      setCurrentQuestionId(answer.nextQuestion);
+  const handleStepBack = () => {
+    if (history.length === 0) {
+      onBack();
+      return;
     }
+    const prev = history[history.length - 1];
+    setHistory((h) => h.slice(0, -1));
+    setCurrentNodeId(prev);
   };
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-2">
         <button
-          onClick={onBack}
+          onClick={handleStepBack}
           className="text-sm text-primary hover:underline font-medium"
         >
-          ← Back to Topics
+          ← Back
         </button>
         <span className="text-xs text-muted-foreground">
-          Question {answeredCount + 1} of ~{totalQuestions}
+          Question {history.length + 1}
         </span>
       </div>
 
       <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-8">
         <motion.div
           className="h-full gradient-primary rounded-full"
-          animate={{ width: `${((answeredCount + 1) / totalQuestions) * 100}%` }}
+          animate={{ width: `${progress}%` }}
           transition={{ duration: 0.3 }}
         />
       </div>
 
-      <h2 className="text-lg font-semibold text-muted-foreground mb-2">{topic.name}</h2>
+      <h2 className="text-lg font-semibold text-muted-foreground mb-4">{topic.name}</h2>
 
       <motion.div
-        key={currentQuestionId}
+        key={currentNodeId}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-2xl border border-border shadow-sm p-8 text-center"
+        className="bg-card rounded-2xl border border-border shadow-sm p-8"
       >
-        <span className="text-4xl mb-4 block">❓</span>
-        <h3 className="text-xl font-bold text-foreground mb-8">{currentQuestion.text}</h3>
+        <h3 className="text-xl font-bold text-foreground mb-3 text-center leading-snug">
+          {qNode.questionText}
+        </h3>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          {currentQuestion.answers.map((answer) => (
+        {qNode.hint && (
+          <div className="mb-6 bg-accent/60 rounded-xl px-4 py-3 text-sm text-muted-foreground text-center">
+            💡 {qNode.hint}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3 mt-6">
+          {qNode.options.map((opt) => (
             <button
-              key={answer.id}
-              onClick={() => handleAnswer(answer.id)}
-              className="flex-1 py-4 px-6 rounded-xl border-2 border-primary/30 text-primary font-semibold text-lg hover:bg-primary hover:text-primary-foreground transition-all min-h-[56px]"
+              key={opt.id}
+              onClick={() => handleAnswer(opt.nextNodeId)}
+              className="w-full py-4 px-6 rounded-xl border-2 border-primary/30 text-primary font-semibold text-base hover:bg-primary hover:text-primary-foreground transition-all text-left"
             >
-              {answer.text}
+              {opt.text}
             </button>
           ))}
         </div>
