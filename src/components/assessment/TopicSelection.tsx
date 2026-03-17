@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { allTopicsList, topics } from "@/data/topics";
+import { mskTopicList } from "@/data/mskTopicList";
+import { mskDecisionTrees } from "@/data/msk_decision_trees";
 import { Search, ChevronRight } from "lucide-react";
 
 interface Props {
@@ -7,10 +8,17 @@ interface Props {
   onBack: () => void;
 }
 
+// IDs that actually have data in the decision-tree file
+const AVAILABLE_IDS = new Set(
+  (mskDecisionTrees.topics as Array<{ id: string; isEnabled: boolean }>)
+    .filter((t) => t.isEnabled)
+    .map((t) => t.id)
+);
+
 const TopicSelection = ({ onSelect, onBack }: Props) => {
   const [search, setSearch] = useState("");
 
-  const filtered = allTopicsList.filter((t) =>
+  const filtered = mskTopicList.filter((t) =>
     t.name.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -32,24 +40,26 @@ const TopicSelection = ({ onSelect, onBack }: Props) => {
 
       <div className="space-y-2">
         {filtered.map((topic) => {
-          const hasData = topics.find((t) => t.id === topic.id);
+          const available = AVAILABLE_IDS.has(topic.id);
           return (
             <button
               key={topic.id}
-              onClick={() => hasData && onSelect(topic.id)}
-              disabled={!hasData}
+              onClick={() => available && onSelect(topic.id)}
+              disabled={!available}
               className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${
-                hasData
+                available
                   ? "border-border bg-card hover:border-primary/40 hover:shadow-md cursor-pointer"
                   : "border-border/50 bg-muted/30 opacity-50 cursor-not-allowed"
               }`}
             >
               <span className="text-2xl">{topic.icon}</span>
               <span className="flex-1 font-medium text-foreground">{topic.name}</span>
-              {hasData ? (
+              {available ? (
                 <ChevronRight className="w-4 h-4 text-muted-foreground" />
               ) : (
-                <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">Soon</span>
+                <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                  Soon
+                </span>
               )}
             </button>
           );
