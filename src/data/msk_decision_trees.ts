@@ -7187,5 +7187,4 @@ export const mskDecisionTrees =
       }
     }
   ]
-}
-as const;
+} as const;
