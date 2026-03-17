@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { mskDecisionTrees } from "@/data/msk_decision_trees";
 import type { DecisionNode, QuestionNode, ResultNode, NoGuidelinesNode } from "@/data/mskTypes";
@@ -18,7 +18,6 @@ export interface ResultPayload {
 }
 
 const QuestionFlow = ({ topicId, selectedModality, onResult, onBack }: Props) => {
-  // Find topic in decision tree data
   const topic = (mskDecisionTrees.topics as unknown as Array<{
     id: string;
     name: string;
@@ -29,24 +28,25 @@ const QuestionFlow = ({ topicId, selectedModality, onResult, onBack }: Props) =>
   const [currentNodeId, setCurrentNodeId] = useState(topic?.rootNodeId ?? "");
   const [history, setHistory] = useState<string[]>([]);
 
-  if (!topic) return null;
+  const currentNode = topic?.nodes[currentNodeId] as DecisionNode | undefined;
 
-  const currentNode = topic.nodes[currentNodeId] as DecisionNode | undefined;
-  if (!currentNode) return null;
+  // Fire onResult when we land on a terminal node
+  useEffect(() => {
+    if (!currentNode) return;
+    if (currentNode.type === "result") {
+      const compare = compareModality(selectedModality, currentNode as ResultNode);
+      onResult({ type: "result", node: currentNode as ResultNode, compareResult: compare });
+    } else if (currentNode.type === "noGuidelines") {
+      onResult({ type: "noGuidelines", node: currentNode as NoGuidelinesNode });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentNodeId]);
 
-  // If we land on a result or noGuidelines node, fire immediately
-  if (currentNode.type === "result") {
-    const compare = compareModality(selectedModality, currentNode as ResultNode);
-    onResult({ type: "result", node: currentNode as ResultNode, compareResult: compare });
-    return null;
-  }
-  if (currentNode.type === "noGuidelines") {
-    onResult({ type: "noGuidelines", node: currentNode as NoGuidelinesNode });
-    return null;
-  }
+  if (!topic || !currentNode) return null;
+  if (currentNode.type !== "question") return null;
 
   const qNode = currentNode as QuestionNode;
-  const progress = Math.min(((history.length + 1) / (history.length + 2)) * 100, 95);
+  const progress = Math.min(((history.length + 1) / (history.length + 3)) * 100, 90);
 
   const handleAnswer = (nextNodeId: string) => {
     setHistory((h) => [...h, currentNodeId]);
