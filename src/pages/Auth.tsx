@@ -77,113 +77,8 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin
-    });
-    setGoogleLoading(false);
-    if (result && 'error' in result && result.error) {
-      toast({ title: t("auth.error.google"), description: String(result.error), variant: "destructive" });
-    }
-  };
-
   const handleResendEmail = async () => {
-    const { error } = await supabase.auth.resend({ type: "signup", email: confirmedEmail });
-    if (error) {
-      toast({ title: t("auth.error.resend"), description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: t("auth.resend.success") });
-    }
-  };
-
-  const iconSide = isRTL ? "right-3" : "left-3";
-  const inputPadStart = isRTL ? "pr-10" : "pl-10";
-  const inputPadEnd = isRTL ? "pl-10" : "pr-10";
-  const eyeSide = isRTL ? "left-3" : "right-3";
-
-  return (
-    <div className="min-h-screen gradient-hero flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-8">
-          
-          <img src={logoSvg} alt="RadiRight" className="h-20 w-auto mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground mt-1" dir="ltr">Evidence-Based Imaging Guidance</p>
-        </motion.div>
-
-        <AnimatePresence mode="wait">
-          {view === "tabs" ?
-          <motion.div
-            key="tabs"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}>
-            
-              <div className="glass-card rounded-2xl p-6">
-                <Tabs defaultValue="signin" className="w-full">
-                  <TabsList className="w-full mb-6">
-                    <TabsTrigger value="signin" className="flex-1">{t("auth.tab.signin")}</TabsTrigger>
-                    <TabsTrigger value="signup" className="flex-1">{t("auth.tab.signup")}</TabsTrigger>
-                  </TabsList>
-
-                  {/* ===== Sign In Tab ===== */}
-                  <TabsContent value="signin">
-                    <form onSubmit={handleSignIn} className="space-y-4">
-                      <div className="space-y-1.5">
-                        <Label htmlFor="si-email">{t("auth.email")}</Label>
-                        <div className="relative">
-                          <Mail className={`absolute ${iconSide} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
-                          <Input
-                          id="si-email"
-                          type="email"
-                          placeholder="you@example.com"
-                          value={signInEmail}
-                          onChange={(e) => setSignInEmail(e.target.value)}
-                          className={inputPadStart}
-                          dir="ltr"
-                          required />
-                        
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <button
-                          type="button"
-                          onClick={() => toast({ title: t("auth.coming_soon"), description: t("auth.forgot_coming_soon") })}
-                          className="text-xs text-primary hover:underline">
-                          
-                            {t("auth.forgotpassword")}
-                          </button>
-                          <Label htmlFor="si-password">{t("auth.password")}</Label>
-                        </div>
-                        <div className="relative">
-                          <button
-                          type="button"
-                          onClick={() => setSignInShowPw(!signInShowPw)}
-                          className={`absolute ${eyeSide} top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground`}>
-                          
-                            {signInShowPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                          <Input
-                          id="si-password"
-                          type={signInShowPw ? "text" : "password"}
-                          placeholder="••••••••"
-                          value={signInPassword}
-                          onChange={(e) => setSignInPassword(e.target.value)}
-                          className={inputPadEnd}
-                          dir="ltr"
-                          required />
-                        
-                        </div>
-                      </div>
-
+...
                       <Button
                       type="submit"
                       disabled={signInLoading}
@@ -195,26 +90,6 @@ const Auth = () => {
                             {t("auth.signinloading")}
                           </span> :
                       t("auth.signinbtn")}
-                      </Button>
-
-                      <div className="relative my-4">
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-border" />
-                        </div>
-                        <div className="relative flex justify-center text-xs">
-                          <span className="bg-card px-3 text-muted-foreground">{t("auth.or")}</span>
-                        </div>
-                      </div>
-
-                      <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleGoogleSignIn}
-                      disabled={googleLoading}
-                      className="w-full flex items-center justify-center gap-2">
-                      
-                        <GoogleIcon />
-                        {googleLoading ? t("auth.googleloading") : t("auth.continuewithgoogle")}
                       </Button>
                     </form>
                   </TabsContent>
