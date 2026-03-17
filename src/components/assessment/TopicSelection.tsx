@@ -10,7 +10,7 @@ interface Props {
 
 // IDs that actually have data in the decision-tree file
 const AVAILABLE_IDS = new Set(
-  (mskDecisionTrees.topics as Array<{ id: string; isEnabled: boolean }>)
+  (mskDecisionTrees.topics as ReadonlyArray<{ id: string; isEnabled: boolean }>)
     .filter((t) => t.isEnabled)
     .map((t) => t.id)
 );
