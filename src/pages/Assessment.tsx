@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import ModalitySelection from "@/components/assessment/ModalitySelection";
 import PanelSelection from "@/components/assessment/PanelSelection";
 import TopicSelection from "@/components/assessment/TopicSelection";
-import QuestionFlow from "@/components/assessment/QuestionFlow";
+import QuestionFlow, { type ResultPayload } from "@/components/assessment/QuestionFlow";
 import ResultScreen from "@/components/assessment/ResultScreen";
-import type { Scenario } from "@/data/topics";
 
 type Step = "modality" | "panel" | "topic" | "questions" | "result";
 
@@ -13,7 +12,7 @@ const Assessment = () => {
   const [step, setStep] = useState<Step>("modality");
   const [selectedModality, setSelectedModality] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("");
-  const [result, setResult] = useState<Scenario | null>(null);
+  const [resultPayload, setResultPayload] = useState<ResultPayload | null>(null);
 
   const stepNumber = { modality: 1, panel: 2, topic: 3, questions: 4, result: 5 };
 
@@ -22,24 +21,22 @@ const Assessment = () => {
     setStep("panel");
   };
 
-  const handlePanelSelected = () => {
-    setStep("topic");
-  };
+  const handlePanelSelected = () => setStep("topic");
 
   const handleTopicSelected = (topicId: string) => {
     setSelectedTopic(topicId);
     setStep("questions");
   };
 
-  const handleResult = (scenario: Scenario) => {
-    setResult(scenario);
+  const handleResult = (payload: ResultPayload) => {
+    setResultPayload(payload);
     setStep("result");
   };
 
   const handleRestart = () => {
     setSelectedModality("");
     setSelectedTopic("");
-    setResult(null);
+    setResultPayload(null);
     setStep("modality");
   };
 
@@ -97,9 +94,9 @@ const Assessment = () => {
               onBack={handleBack}
             />
           )}
-          {step === "result" && result && (
+          {step === "result" && resultPayload && (
             <ResultScreen
-              scenario={result}
+              payload={resultPayload}
               selectedModality={selectedModality}
               onRestart={handleRestart}
             />
